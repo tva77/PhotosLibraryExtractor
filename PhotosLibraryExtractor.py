@@ -68,20 +68,24 @@ def md5sum(filename):
 
 	return h.hexdigest()
 
+def date_valid(metadata, field):
+	return field in metadata and not metadata[field].isspace()
+
 def grab_metadata(fp):
 	with exiftool.ExifTool() as et:
 		metadata = et.get_metadata(fp)	
 	#print(metadata)
-	
-	if 'QuickTime:ContentCreateDate' in metadata: # usually the date to go by for videos transcoded in Photos.app... CreateDate will be the transcode date for those
+
+	if date_valid(metadata, 'QuickTime:ContentCreateDate'):
+		# usually the date to go by for videos transcoded in Photos.app... CreateDate will be the transcode date for those
 		date = metadata['QuickTime:ContentCreateDate']
-	elif 'EXIF:DateTimeOriginal' in metadata:
+	elif date_valid(metadata, 'EXIF:DateTimeOriginal'):
 		date = metadata['EXIF:DateTimeOriginal']
-	elif 'EXIF:CreateDate' in metadata:
+	elif date_valid(metadata, 'EXIF:CreateDate'):
 		date = metadata['EXIF:CreateDate']
-	elif 'QuickTime:CreateDate' in metadata:
+	elif date_valid(metadata, 'QuickTime:CreateDate'):
 		date = metadata['QuickTime:CreateDate']
-	elif 'EXIF:ModifyDate' in metadata:
+	elif date_valid(metadata, 'EXIF:ModifyDate'):
 		date = metadata['EXIF:ModifyDate']
 	else:
 		date = False
