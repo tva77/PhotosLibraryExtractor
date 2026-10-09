@@ -77,23 +77,47 @@ Make sure your Photos are completely downloaded and up to date (the bottom of th
 
 ### Prerequisites
 
-- This script is written using Python 3, so make sure you have that
-- I use [exiftool](https://exiftool.org) to read metadata from the images, so make sure you have that installed and accessible through the command line
-    - If you're on macOS you can use [Brew](https://brew.sh) to install it: `brew install exiftool` 
-- The script uses the Python library [pyexiftool](https://github.com/smarnach/pyexiftool) to use exiftool
-    - Apparently, you can install that library using pip, but that didn't work for me (I get import module error). What worked for me was just having the `exiftool.py` file in the same folder as this script 
+- Python 3
+- [exiftool](https://exiftool.org), installed and accessible from the command line
+    - On macOS, install it with [Homebrew](https://brew.sh): `brew install exiftool`
+- The Python library [PyExifTool](https://github.com/smarnach/pyexiftool), version `0.5.6`
+
+On macOS with Homebrew Python, the system environment may reject global `pip` installs. Create a local virtual environment for this repository:
+
+    cd PhotosLibraryExtractor
+    python3 -m venv .venv
+    .venv/bin/python -m pip install PyExifTool==0.5.6
+
+The `.venv` directory is ignored by Git. The script supports the current `ExifToolHelper` API and falls back to the legacy `ExifTool` API.
 
 ### Running the Script
 
-Run the script: 
-    
-    python3 PhotosLibraryExtractor.py -i /folder/with/pictures/ -o /destination/
+From the repository directory, run:
 
-If you are processing a Photos.app Library you should use the `originals` sub folder (the easiest way to get to it is to open the Library in Finder (by right clikcing it and selecting _Show Package Contents_ and dragging and dropping the originals folder onto your Terminal): 
+    .venv/bin/python PhotosLibraryExtractor.py -i /folder/with/pictures/ -o /destination/
 
-    python3 PhotosLibraryExtractor.py -i "~/Photos Library.photoslibrary/originals" -o /destination/
+Alternatively, activate the virtual environment first:
 
-The script is very verbose, almost annoyingly so, because these are highly valuable photos we are dealing with and I want you to know exactly what is going on.
+    source .venv/bin/activate
+    python PhotosLibraryExtractor.py -i /folder/with/pictures/ -o /destination/
+
+If you are processing a Photos.app Library, you can provide the library itself; the script automatically looks for its `originals` folder (and the legacy `Masters` folder):
+
+    .venv/bin/python PhotosLibraryExtractor.py -i "~/Photos Library.photoslibrary" -o /destination/
+
+You can also provide a custom PLEDB path:
+
+    .venv/bin/python PhotosLibraryExtractor.py -i /folder/with/pictures/ -o /destination/ -db /path/to/PLEDB
+
+The script is intentionally verbose because these are highly valuable photos and the output shows what is being copied or skipped.
+
+### Performance
+
+The extractor keeps one ExifTool process open and reads metadata in batches. It also caches MD5 hashes and uses constant-time lookups for processed files, duplicate hashes, and Live Photo pairs. This avoids repeatedly starting ExifTool or hashing the same files during a run.
+
+To run the regression tests:
+
+    .venv/bin/python -m unittest discover -s tests -v
 
 ### The "PLEDB" File
 

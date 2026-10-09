@@ -1,4 +1,5 @@
 .DS_Store
 exiftool.py
 *.pyc
+.venv/
 PhotosLibraryExtractor_ProcessedFiles
