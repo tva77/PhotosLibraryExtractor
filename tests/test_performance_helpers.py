@@ -63,6 +63,12 @@ class PerformanceHelpersTests(unittest.TestCase):
             "/output/Unknown Dates/photo.jpg",
         )
 
+    def test_destination_strips_colon_from_timezone_offset(self):
+        self.assertEqual(
+            ple.destination_from_date("2012:01:02 03:04:05-03:00", "/input/photo.jpg", "/output"),
+            "/output/2012/01/2012-01-02 03.04.05.jpg",
+        )
+
     def test_main_pairs_live_photo_and_records_duplicates(self):
         class FakeExifTool:
             def __enter__(self):

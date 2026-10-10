@@ -78,7 +78,7 @@ def destination_from_date(in_date, in_path, out_dir):
     if in_date:
         date, time = in_date.split(" ", 1)
         year, month, day = date.split(":")
-        hour, minute, second = time.split(":")
+        hour, minute, second = time.split(":", 2)
         if "+" in second:
             second = second.split("+", 1)[0]
         elif "-" in second:  # i think there can be negative offsets too ?
