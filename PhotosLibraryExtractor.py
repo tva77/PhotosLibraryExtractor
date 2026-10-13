@@ -61,10 +61,17 @@ def load_metadata(exif_tool, paths, batch_size=128):
     metadata_by_path = {}
     for start in range(0, len(paths), batch_size):
         batch = paths[start:start + batch_size]
-        if exif_tool.__class__.__name__ == "ExifToolHelper":
-            metadata = exif_tool.get_metadata(batch)
-        else:
-            metadata = exif_tool.get_metadata(*batch)
+        try:
+            if exif_tool.__class__.__name__ == "ExifToolHelper":
+                metadata = exif_tool.get_metadata(batch)
+            else:
+                metadata = exif_tool.get_metadata(*batch)
+        except Exception:
+            if len(batch) > 1:
+                metadata_by_path.update(load_metadata(exif_tool, batch, max(1, len(batch) // 2)))
+                continue
+            print("Metadata unavailable:", batch[0])
+            metadata = [{}]
         if isinstance(metadata, dict):
             metadata = [metadata]
         for path, values in zip(batch, metadata):

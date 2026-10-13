@@ -42,6 +42,19 @@ class PerformanceHelpersTests(unittest.TestCase):
         self.assertEqual(len(tool.calls), 1)
         self.assertEqual(result[paths[0]]["EXIF:DateTimeOriginal"], "2024:01:02 03:04:05")
 
+    def test_load_metadata_falls_back_when_a_batch_fails(self):
+        class ExifToolHelper:
+            def get_metadata(self, paths):
+                if len(paths) > 1:
+                    raise RuntimeError("batch failed")
+                return [{"SourceFile": paths[0], "EXIF:DateTimeOriginal": "2024:01:02 03:04:05"}]
+
+        paths = ["/tmp/one.jpg", "/tmp/two.jpg"]
+        result = ple.load_metadata(ExifToolHelper(), paths)
+
+        self.assertEqual(set(result), set(paths))
+        self.assertEqual(result[paths[1]]["EXIF:DateTimeOriginal"], "2024:01:02 03:04:05")
+
     def test_hash_cache_returns_md5_without_rehashing(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "photo.jpg"
